@@ -1,5 +1,6 @@
 module UnixMmap
-
-# Write your package code here.
-
+@static if Sys.isunix()
+    include("staticexpand.jl")
+    include("mmap.jl")
+end
 end
