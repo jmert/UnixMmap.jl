@@ -176,10 +176,9 @@ end
 # Low-level form which mirrors a raw mmap, but constructs a Julia array of given
 # dimension(s) at a specific offset within a file (includes accounting for page alignment
 # requirement).
-function mmap(::Type{A}, dims::Dims,
+function mmap(::Type{Array{T}}, dims::NTuple{N,Integer},
               prot::MmapProtection, flags::MmapFlags,
-              fd::RawFD, offset::Integer) where {T, N, A<:Array{T,N}}
-
+              fd::RawFD, offset::Integer) where {T, N}
     isbitstype(T) || throw(ArgumentError("unable to mmap type $T; must satisfy `isbitstype(T) == true`"))
 
     len = prod(dims) * sizeof(T)
@@ -196,18 +195,18 @@ function mmap(::Type{A}, dims::Dims,
     finalizer(_ -> _unmap!(ptr, mmaplen), array)
     return array
 end
-function mmap(::Type{A}, len::Int, prot::MmapProtection, flags::MmapFlags,
-              fd::RawFD, offset::Int) where {T, N, A<:Array{T,N}}
-    return mmap(A, (Int(len),), prot, flags, fd, offset)
+function mmap(::Type{Array{T}}, len::Int, prot::MmapProtection, flags::MmapFlags,
+              fd::RawFD, offset::Int) where {T}
+    return mmap(Array{T}, (Int(len),), prot, flags, fd, offset)
 end
 
 # Higher-level interface which takes an IO object and sets default flag values.
-function mmap(io::IO, ::Type{A}, dims::NTuple{N,Integer};
+function mmap(io::IO, ::Type{Array{T}}, dims::NTuple{N,Integer};
               offset::Union{Integer,Nothing} = nothing,
               prot::Union{MmapProtection,Nothing} = nothing,
               flags::Union{MmapFlags,Nothing} = nothing,
               grow::Bool = true
-             ) where {T, N, A<:Array{T,N}}
+             ) where {T, N}
     isbitstype(T) || throw(ArgumentError("unable to mmap type $T; must satisfy `isbitstype(T) == true`"))
     isopen(io) || throw(ArgumentError("$io must be open to mmap"))
 
@@ -222,34 +221,34 @@ function mmap(io::IO, ::Type{A}, dims::NTuple{N,Integer};
 
     grow && iswritable(io) && grow!(io, offset, len)
 
-    return mmap(A, dims, prot, flags, gethandle(io), offset)
+    return mmap(Array{T}, dims, prot, flags, gethandle(io), offset)
 end
-function mmap(io::IO, ::Type{A}, len::Integer;
+function mmap(io::IO, ::Type{Array{T}}, len::Integer;
               offset::Union{Integer,Nothing} = nothing,
               prot::Union{MmapProtection,Nothing} = nothing,
               flags::Union{MmapFlags,Nothing} = nothing,
               grow::Bool = true
-             ) where {T, N, A<:Array{T,N}}
-    return mmap(io, A, (len,);
+             ) where {T}
+    return mmap(io, Array{T}, (len,);
                 offset = offset, prot = prot, flags = flags, grow = grow)
 end
-function mmap(io::IO, ::Type{A} = Array{UInt8};
+function mmap(io::IO, ::Type{Array{T}} = Array{UInt8};
               offset::Union{Integer,Nothing} = nothing,
               prot::Union{MmapProtection,Nothing} = nothing,
               flags::Union{MmapFlags,Nothing} = nothing,
               grow::Bool = true
-             ) where {T, N, A<:Array{T,N}}
-    return mmap(io, A, filedim(io, T, offset);
+             ) where {T}
+    return mmap(io, Array{T}, filedim(io, T, offset);
                 offset = offset, prot = prot, flags = flags, grow = grow)
 end
 
 # Mapping of files
-function mmap(file::AbstractString, ::Type{A}, dims::NTuple{N,Integer};
+function mmap(file::AbstractString, ::Type{Array{T}}, dims::NTuple{N,Integer};
               offset::Union{Integer,Nothing} = nothing,
               prot::Union{MmapProtection,Nothing} = nothing,
               flags::Union{MmapFlags,Nothing} = nothing,
               grow::Bool = true
-             ) where {T, N, A<:Array{T,N}}
+             ) where {T, N}
     if prot === nothing
         # Default to read-only if file exists, otherwise read/write/create
         openmode = isfile(file) ? "r" : "w+"
@@ -265,49 +264,49 @@ function mmap(file::AbstractString, ::Type{A}, dims::NTuple{N,Integer};
     end
 
     return open(file, openmode) do io
-        mmap(io, A, dims;
+        mmap(io, Array{T}, dims;
              offset = offset, prot = prot, flags = flags, grow = grow)
     end
 end
-function mmap(file::AbstractString, ::Type{A}, len::Integer;
+function mmap(file::AbstractString, ::Type{Array{T}}, len::Integer;
               offset::Union{Integer,Nothing} = nothing,
               prot::Union{MmapProtection,Nothing} = nothing,
               flags::Union{MmapFlags,Nothing} = nothing,
               grow::Bool = true
-             ) where {T, N, A<:Array{T,N}}
-    return mmap(file, A, (len,);
+             ) where {T}
+    return mmap(file, Array{T}, (len,);
                 offset = offset, prot = prot, flags = flags, grow = grow)
 end
 # Default mapping of the [rest of] given file
-function mmap(file::AbstractString, ::Type{A} = Array{UInt8};
+function mmap(file::AbstractString, ::Type{Array{T}} = Array{UInt8};
               offset::Union{Integer,Nothing} = nothing,
               prot::Union{MmapProtection,Nothing} = nothing,
               flags::Union{MmapFlags,Nothing} = nothing,
               grow::Bool = true
-             ) where {T, N, A<:Array{T,N}}
-    return mmap(file, A, filedim(file, T, offset);
+             ) where {T}
+    return mmap(file, Array{T}, filedim(file, T, offset);
                 offset = offset, prot = prot, flags = flags, grow = grow)
 end
 
 # form to construct anonymous memory maps
-function mmap(::Type{A}, dims::NTuple{N,Integer};
+function mmap(::Type{Array{T}}, dims::NTuple{N,Integer};
               prot::Union{MmapProtection,Nothing} = nothing,
               flags::Union{MmapFlags,Nothing} = nothing
-             ) where {T, N, A<:Array{T,N}}
+             ) where {T, N}
     prot = prot === nothing ? PROT_READ | PROT_WRITE : prot
     if flags === nothing
         flags = MAP_SHARED | MAP_ANONYMOUS
     else
         flags |= MAP_ANONYMOUS
     end
-    return mmap(Anonymous(), A, dims;
+    return mmap(Anonymous(), Array{T}, dims;
                 offset = Int64(0), prot = prot, flags = flags, grow = false)
 end
-function mmap(::Type{A}, len::Integer;
+function mmap(::Type{Array{T}}, len::Integer;
               prot::Union{MmapProtection,Nothing} = nothing,
               flags::Union{MmapFlags,Nothing} = nothing
-             ) where {T, N, A<:Array{T,N}}
-    return mmap(A, (len,);
+             ) where {T}
+    return mmap(Array{T}, (len,);
                 prot = prot, flags = flags)
 end
 
