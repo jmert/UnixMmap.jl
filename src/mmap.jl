@@ -35,31 +35,31 @@ Base.cconvert(::Type{T}, pf::MmapProtection) where {T <: Integer} = T(pf)
         MAP_SYNC       = 0x8_0000
         MAP_FIXED_NOREPLACE = 0x10_0000
     end
-    @static if Sys.isnetbsd() || Sys.isdragonfly() || Sys.isapple()
+    @static if Sys.isapple() || (VERSION >= v"1.1" && (Sys.isnetbsd() || Sys.isdragonfly()))
         MAP_RENAME       = 0x0020
         MAP_NORESERVE    = 0x0040
         MAP_INHERIT      = 0x0080
         MAP_NOEXTEND     = 0x0100
         MAP_HASSEMAPHORE = 0x0200
     end
-    @static if Sys.isfreebsd()
+    @static if VERSION >= v"1.1" && Sys.isfreebsd()
         MAP_STACK   =   0x0400
         MAP_NOSYNC  =   0x0800
         MAP_GUARD   =   0x2000
         MAP_EXCL    =   0x4000
         MAP_NOCORE  = 0x4_0000
         MAP_32BIT   = 0x8_0000
-    elseif Sys.isdragonfly()
+    elseif VERSION >= v"1.1" && Sys.isdragonfly()
         MAP_STACK      =   0x0400
         MAP_NOSYNC     =   0x0800
         MAP_VPAGETABLE =   0x2000
         MAP_TRYFIXED   = 0x1_0000
         MAP_NOCORE     = 0x2_0000
         MAP_SIZEALIGN  = 0x4_0000
-    elseif Sys.isopenbsd()
+    elseif VERSION >= v"1.1" && Sys.isopenbsd()
         MAP_STACK   = 0x4000
         MAP_CONCEAL = 0x8000
-    elseif Sys.isnetbsd()
+    elseif VERSION >= v"1.1" && Sys.isnetbsd()
         MAP_REMAPDUP = 0x0004
         MAP_TRYFIXED = 0x0400
         MAP_WIRED    = 0x0800
@@ -98,19 +98,19 @@ Base.cconvert(::Type{T}, mf::MmapFlags) where {T <: Integer} = T(mf)
         MADV_SOFT_OFFLINE = 101
     elseif Sys.isapple()
         MADV_FREE = 5
-    elseif Sys.isfreebsd() || Sys.isdragonfly()
+    elseif VERSION >= v"1.1" && (Sys.isfreebsd() || Sys.isdragonfly())
         MADV_FREE = 5
         MADV_NOSYNC = 6
         MADV_AUTOSYNC = 7
         MADV_NOCORE = 8
         MADV_CORE = 9
-        @static if Sys.isfreebsd()
+        @static if VERSION >= v"1.1" && Sys.isfreebsd()
             MADV_PROTECT = 10
         else
             MADV_INVAL = 10
             MADV_SETMAP = 11
         end
-    elseif Sys.isopenbsd() || Sys.isnetbsd()
+    elseif VERSION >= v"1.1" && (Sys.isopenbsd() || Sys.isnetbsd())
         MADV_SPACEAVAIL = 5
         MADV_FREE = 6
     end
