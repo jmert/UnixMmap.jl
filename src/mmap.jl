@@ -294,11 +294,7 @@ function mmap(::Type{Array{T}}, dims::NTuple{N,Integer};
               flags::Union{MmapFlags,Nothing} = nothing
              ) where {T, N}
     prot = prot === nothing ? PROT_READ | PROT_WRITE : prot
-    if flags === nothing
-        flags = MAP_SHARED | MAP_ANONYMOUS
-    else
-        flags |= MAP_ANONYMOUS
-    end
+    flags = MAP_ANONYMOUS | (flags === nothing ? MAP_SHARED : flags)
     return mmap(Anonymous(), Array{T}, dims;
                 offset = Int64(0), prot = prot, flags = flags, grow = false)
 end
@@ -311,33 +307,43 @@ function mmap(::Type{Array{T}}, len::Integer;
 end
 
 """
-    mmap(io::IO, ::Type{Array{T,N}}, dims::NTuple{N,Integer}; kws...) where {T,N}
-    mmap(io::IO, ::Type{Vector{T}}, len::Integer; kws...) where {T}
-    mmap(io::IO, ::Type{Vector{T}}; kws...) where {T}
+    mmap(file::Union{IO,AbstractString}[, ::Type{Array{T}}, dims]; kws...)
+    mmap(::Type{Array{T}}, dims; kws...)
 
+Memory maps an `Array` from a file `file` of size `dims` (either a scalar `Integer` or
+a tuple of dimension lengths), or creates an anonymous mapping not backed by a file if
+no file is given.
 
-    mmap(filename::AbstractString, ::Type{Array{T,N}}, dims::NTuple{N,Integer}; kws...) where {T,N}
-    mmap(filename::AbstractString, ::Type{Vector{T}}, len::Integer; kws...) where {T}
-    mmap(filename::AbstractString, ::Type{Vector{T}}; kws...) where {T}
-
-
-    mmap(::Type{Array{T,N}}, dims::NTuple{N,Integer}; kws...) where {T,N}
-    mmap(::Type{Vector{T}}, dims::Integer; kws...) where {T}
+If not specified, the array type defaults to `Array{UInt8}`, and `dim` defaults to a
+vector with length equal to the number of elements remaining in the file (accounting for
+a non-zero position in the file stream `io`).
 
 # Extended help
 
+This function provides a relatively simple wrapper around the underlying `mmap` system
+call. In particular, it is the user's responsibility to ensure the combination(s) of
+stream state (e.g. read/write or read-only, file length), protection flags, and memory map
+flags must form a valid `mmap` request, as they are not validated here.
+
+See your system `mmap` man page for details on the behaviors of each flag.
+
 ## Keywords
 
-* `flags`
-* `prot`
-* `offset`
-* `grow`
+The following keywords are available:
 
-## Low-level Interfaces
+* `flags::MmapFlags` — any of the `MAP_*` system-specific constants. For files, this
+  defaults to `MAP_SHARED`, and anonymous mappings default to `MAP_SHARED | MAP_ANONYMOUS`.
 
-    mmap(::Type{Array{T,N}}, dims::NTuple{N,Integer},
-         prot::MmapProtection, flags::MmapFlags, fd::RawFD, offset::Integer) where {N,T}
+* `prot::MmapProtection` — any of the `PROT_*` flags. The default is `PROT_READ |
+  PROT_WRITE` for all anonymous maps and memory maps of non-existent files (in which case
+  the file will be created). If the file already exists, it is opened read-only and the
+  default is `PROT_READ` only.
 
+* `offset::Integer` — offset _in bytes_ from the beginning of the file, defaulting to the current
+  stream position. This keyword is not valid for anonymous maps.
+
+* `grow::Bool` — Whether to grow a file to accomodate the memory map, if the file is
+  writable. Defaults to `true`. This keyword is not valid for anonymous maps.
 """
 function mmap end
 
@@ -357,8 +363,10 @@ pages of the memory-mapped `array` are resident in RAM. Pages corresponding to `
 values will cause a fault if referenced.
 
 !!! note
-    The return array will not map to `PAGESIZE` chunks of `array` if the `mmap` offset
-    was not a multiple of `PAGESIZE`.
+    Memory maps are always page-aligned, so an offset which is not a multiple of `PAGESIZE`
+    will result in a return array where the first element does _not_ correspond to the
+    first `PAGESIZE ÷ sizeof(eltype(array))` elements of `array` — i.e. the first page
+    may cover memory addresses before the first element of `array`.
 """
 function mincore(array::Array)
     ptr, _, len = pagepointer(array)
