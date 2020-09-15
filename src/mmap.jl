@@ -1,5 +1,4 @@
 using BitFlags
-using MacroTools: @capture, flatten, isexpr, postwalk
 
 import Base: INVALID_OS_HANDLE
 import Mmap
@@ -104,7 +103,7 @@ Base.cconvert(::Type{T}, mf::MmapFlags) where {T <: Integer} = T(mf)
         MADV_AUTOSYNC = 7
         MADV_NOCORE = 8
         MADV_CORE = 9
-        @static if VERSION >= v"1.1" && Sys.isfreebsd()
+        @static if Sys.isfreebsd()
             MADV_PROTECT = 10
         else
             MADV_INVAL = 10

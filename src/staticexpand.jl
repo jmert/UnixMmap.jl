@@ -1,3 +1,5 @@
+using MacroTools: flatten, isexpr, prewalk, postwalk
+
 """
     @staticexpand @a_macro begin
         # some code...
@@ -16,7 +18,7 @@ macro staticexpand(expr::Expr)
     sentinel = gensym("sentinel")
     isexpr(expr, :macrocall) || error("Expected a macro to expand")
     # Evaluate the static statements
-    expr′ = postwalk(expr) do ex
+    expr′ = prewalk(expr) do ex
         # Search for @static macro
         isexpr(ex, :macrocall) || return ex
         ex = ex::Expr
