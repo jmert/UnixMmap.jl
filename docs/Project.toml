@@ -1,0 +1,8 @@
+[deps]
+BitFlags = "d1d4a3ce-64b1-5f1a-9ba4-7e7e69966f35"
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+Markdown = "d6f4376e-aef5-505a-96c1-9c027394607a"
+UnixMmap = "674b2976-56af-439b-a2b1-837be4a3d087"
+
+[compat]
+Documenter = "0.25.2"
