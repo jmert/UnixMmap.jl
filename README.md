@@ -1,8 +1,8 @@
 # UnixMmap
 
-| **Build Status**                                             |
-|:------------------------------------------------------------:|
-| [![][ci-img]][ci-url]                                        |
+| **Documentation**                                                         | **Build Status**                                             |
+|:-------------------------------------------------------------------------:|:------------------------------------------------------------:|
+| [![][docs-stable-img]][docs-stable-url] [![][docs-dev-img]][docs-dev-url] | [![][ci-img]][ci-url]                                        |
 
 `UnixMmap` is an alternative to the Julia standard library's `Mmap`, with the purpose of
 exposing the Unix memory-mapping interface.
