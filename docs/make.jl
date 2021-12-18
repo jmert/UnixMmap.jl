@@ -26,7 +26,6 @@ makedocs(
             "Public" => "lib/public.md",
         ]
     ],
-    repo = "https://github.com/jmert/UnixMmap.jl/blob/{commit}{path}#L{line}",
 )
 
 deploydocs(
