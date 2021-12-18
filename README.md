@@ -19,7 +19,7 @@ julia> using UnixMmap
 A file can be memory mapped (read-only by default) by giving the filename and the `Array`
 type (optionally with dimensions to give a shape):
 ```julia
-julia> UnixMmap.mmap("arbitrary.dat", Array{Float64})
+julia> UnixMmap.mmap("arbitrary.dat", Vector{Float64})
 192-element Vector{Float64}:
  0.0
  0.0
@@ -27,7 +27,7 @@ julia> UnixMmap.mmap("arbitrary.dat", Array{Float64})
  0.0
  0.0
 
-julia> UnixMmap.mmap("arbitrary.dat", Array{Float64}, (64, 3))
+julia> UnixMmap.mmap("arbitrary.dat", Matrix{Float64}, (64, 3))
 64×3 Matrix{Float64}:
  0.0  0.0  0.0
  0.0  0.0  0.0
@@ -38,7 +38,7 @@ julia> UnixMmap.mmap("arbitrary.dat", Array{Float64}, (64, 3))
 while an anonymous memory map can be created by instead specifying the `Array` type and
 dimensions:
 ```julia
-julia> UnixMmap.mmap(Array{Float64}, (128, 3))
+julia> UnixMmap.mmap(Matrix{Float64}, (128, 3))
 128×3 Matrix{Float64}:
  0.0  0.0  0.0
  0.0  0.0  0.0
