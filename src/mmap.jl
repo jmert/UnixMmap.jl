@@ -39,7 +39,7 @@ fileflags(::IO) = MAP_SHARED
 ###
 
 # Raw call to mmap syscall
-function _mmap(ptr::Ptr{Cvoid}, len::Int,
+function _sys_mmap(ptr::Ptr{Cvoid}, len::Int,
                                    prot::MmapProtection, flags::MmapFlags,
                                    fd::RawFD, offset::Int64)
 
@@ -53,7 +53,7 @@ function _mmap(ptr::Ptr{Cvoid}, len::Int,
     return ret
 end
 
-function _unmap!(ptr::Ptr{Cvoid}, len::Int)
+function _sys_unmap!(ptr::Ptr{Cvoid}, len::Int)
     ret = ccall(:munmap, Cint, (Ptr{Cvoid}, Csize_t), ptr, len)
     Base.systemerror("munmap", ret != 0)
     return
@@ -62,7 +62,7 @@ end
 # Low-level form which mirrors a raw mmap, but constructs a Julia array of given
 # dimension(s) at a specific offset within a file (includes accounting for page alignment
 # requirement).
-function mmap(::Type{Array{T}}, dims::NTuple{N,Integer},
+function _mmap(::Type{Array{T}}, dims::NTuple{N,Integer},
               prot::MmapProtection, flags::MmapFlags,
               fd::RawFD, offset::Integer) where {T, N}
     isbitstype(T) || throw(ArgumentError("unable to mmap type $T; must satisfy `isbitstype(T) == true`"))
@@ -75,19 +75,19 @@ function mmap(::Type{Array{T}}, dims::NTuple{N,Integer},
     page_pad = rem(Int64(offset), PAGESIZE)
     mmaplen::Int = len + page_pad
 
-    ptr = _mmap(C_NULL, mmaplen, prot, flags, fd, Int64(offset) - page_pad)
+    ptr = _sys_mmap(C_NULL, mmaplen, prot, flags, fd, Int64(offset) - page_pad)
     aptr = convert(Ptr{T}, ptr + page_pad)
     array = unsafe_wrap(Array{T,N}, aptr, dims)
-    finalizer(_ -> _unmap!(ptr, mmaplen), array)
+    finalizer(_ -> _sys_unmap!(ptr, mmaplen), array)
     return array
 end
-function mmap(::Type{Array{T}}, len::Int, prot::MmapProtection, flags::MmapFlags,
+function _mmap(::Type{Array{T}}, len::Int, prot::MmapProtection, flags::MmapFlags,
               fd::RawFD, offset::Int) where {T}
-    return mmap(Array{T}, (Int(len),), prot, flags, fd, offset)
+    return _mmap(Array{T}, (Int(len),), prot, flags, fd, offset)
 end
 
 # Higher-level interface which takes an IO object and sets default flag values.
-function mmap(io::IO, ::Type{Array{T}}, dims::NTuple{N,Integer};
+function mmap(io::IO, ::Type{<:Array{T}}, dims::NTuple{N,Integer};
               offset::Union{Integer,Nothing} = nothing,
               prot::Union{MmapProtection,Nothing} = nothing,
               flags::Union{MmapFlags,Nothing} = nothing,
@@ -107,9 +107,9 @@ function mmap(io::IO, ::Type{Array{T}}, dims::NTuple{N,Integer};
 
     grow && iswritable(io) && grow!(io, offset, len)
 
-    return mmap(Array{T}, dims, prot, flags, gethandle(io), offset)
+    return _mmap(Array{T}, dims, prot, flags, gethandle(io), offset)
 end
-function mmap(io::IO, ::Type{Array{T}}, len::Integer;
+function mmap(io::IO, ::Type{<:Array{T}}, len::Integer;
               offset::Union{Integer,Nothing} = nothing,
               prot::Union{MmapProtection,Nothing} = nothing,
               flags::Union{MmapFlags,Nothing} = nothing,
@@ -118,7 +118,7 @@ function mmap(io::IO, ::Type{Array{T}}, len::Integer;
     return mmap(io, Array{T}, (len,);
                 offset = offset, prot = prot, flags = flags, grow = grow)
 end
-function mmap(io::IO, ::Type{Array{T}} = Array{UInt8};
+function mmap(io::IO, ::Type{<:Array{T}} = Array{UInt8};
               offset::Union{Integer,Nothing} = nothing,
               prot::Union{MmapProtection,Nothing} = nothing,
               flags::Union{MmapFlags,Nothing} = nothing,
@@ -129,7 +129,7 @@ function mmap(io::IO, ::Type{Array{T}} = Array{UInt8};
 end
 
 # Mapping of files
-function mmap(file::AbstractString, ::Type{Array{T}}, dims::NTuple{N,Integer};
+function mmap(file::AbstractString, ::Type{<:Array{T}}, dims::NTuple{N,Integer};
               offset::Union{Integer,Nothing} = nothing,
               prot::Union{MmapProtection,Nothing} = nothing,
               flags::Union{MmapFlags,Nothing} = nothing,
@@ -154,7 +154,7 @@ function mmap(file::AbstractString, ::Type{Array{T}}, dims::NTuple{N,Integer};
              offset = offset, prot = prot, flags = flags, grow = grow)
     end
 end
-function mmap(file::AbstractString, ::Type{Array{T}}, len::Integer;
+function mmap(file::AbstractString, ::Type{<:Array{T}}, len::Integer;
               offset::Union{Integer,Nothing} = nothing,
               prot::Union{MmapProtection,Nothing} = nothing,
               flags::Union{MmapFlags,Nothing} = nothing,
@@ -164,7 +164,7 @@ function mmap(file::AbstractString, ::Type{Array{T}}, len::Integer;
                 offset = offset, prot = prot, flags = flags, grow = grow)
 end
 # Default mapping of the [rest of] given file
-function mmap(file::AbstractString, ::Type{Array{T}} = Array{UInt8};
+function mmap(file::AbstractString, ::Type{<:Array{T}} = Array{UInt8};
               offset::Union{Integer,Nothing} = nothing,
               prot::Union{MmapProtection,Nothing} = nothing,
               flags::Union{MmapFlags,Nothing} = nothing,
@@ -175,7 +175,7 @@ function mmap(file::AbstractString, ::Type{Array{T}} = Array{UInt8};
 end
 
 # form to construct anonymous memory maps
-function mmap(::Type{Array{T}}, dims::NTuple{N,Integer};
+function mmap(::Type{<:Array{T}}, dims::NTuple{N,Integer};
               prot::Union{MmapProtection,Nothing} = nothing,
               flags::Union{MmapFlags,Nothing} = nothing
              ) where {T, N}
@@ -184,7 +184,7 @@ function mmap(::Type{Array{T}}, dims::NTuple{N,Integer};
     return mmap(Anonymous(), Array{T}, dims;
                 offset = Int64(0), prot = prot, flags = flags, grow = false)
 end
-function mmap(::Type{Array{T}}, len::Integer;
+function mmap(::Type{<:Array{T}}, len::Integer;
               prot::Union{MmapProtection,Nothing} = nothing,
               flags::Union{MmapFlags,Nothing} = nothing
              ) where {T}

@@ -169,6 +169,48 @@ end
     end
 end
 
+@testset "Inferring return types" begin
+    # N.B. also tests that any <:Array{T} works as the array type argument
+    data = repeat(1.0:16.0, 1, 3)
+    mktemp() do path, io
+        write(io, data)
+        flush(io)
+        seek(io, 0)
+        @testset "IO handle - $AT" for AT in (Array, Vector, Matrix)
+            # dims isa Tuple{Int}, so V isa Vector no matter AT
+            V = @inferred mmap(io, AT{Float64}, (16*3,))
+            @test V isa Vector
+            @test V == vec(data)
+            # dims isa Tuple{Int,Int}, so M isa Matrix no matter AT
+            M = @inferred mmap(io, AT{Float64}, (16, 3))
+            @test M isa Matrix
+            @test M == data
+        end
+        close(io)
+        @testset "File name - $AT" for AT in (Array, Vector, Matrix)
+            # dims isa Tuple{Int}, so V isa Vector no matter AT
+            V = @inferred mmap(path, AT{Float64}, (16*3,))
+            @test V isa Vector
+            @test V == vec(data)
+            # dims isa Tuple{Int,Int}, so M isa Matrix no matter AT
+            M = @inferred mmap(path, AT{Float64}, (16, 3))
+            @test M isa Matrix
+            @test M == data
+        end
+        @testset "Anonymous - $AT" for AT in (Array, Vector, Matrix)
+            # dims isa Tuple{Int}, so V isa Vector no matter AT
+            V = @inferred mmap(AT{Float64}, (16*3,))
+            @test V isa Vector
+            @test all(iszero, V)
+            # dims isa Tuple{Int,Int}, so M isa Matrix no matter AT
+            M = @inferred mmap(AT{Float64}, (16, 3))
+            @test M isa Matrix
+            @test all(iszero, M)
+        end
+        GC.gc()
+    end
+end
+
 @testset "Anonymous memory maps" begin
     A = mmap(Array{Int16}, 500)
     @test size(A) == (500,)
