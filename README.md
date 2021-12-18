@@ -9,24 +9,42 @@ exposing the Unix memory-mapping interface.
 
 ### Installation and usage
 
-This library is **not** registered in Julia's [General registry][General.jl],
-so the package must be installed either by cloning it directly:
+Installation and loading is as easy as:
+```julia
+pkg> add UnixMmap
 
-```
-(@v1.6) pkg> add https://github.com/jmert/UnixMmap.jl
-```
-
-or by making use of my [personal registry][Registry.jl]:
-
-```
-(@v1.6) pkg> registry add https://github.com/jmert/Registry.jl
-(@v1.6) pkg> add UnixMmap
-```
-
-After installing, just load like any other Julia package:
-
-```
 julia> using UnixMmap
+```
+
+A file can be memory mapped (read-only by default) by giving the filename and the `Array`
+type (optionally with dimensions to give a shape):
+```julia
+julia> UnixMmap.mmap("arbitrary.dat", Array{Float64})
+192-element Vector{Float64}:
+ 0.0
+ 0.0
+ ⋮
+ 0.0
+ 0.0
+
+julia> UnixMmap.mmap("arbitrary.dat", Array{Float64}, (64, 3))
+64×3 Matrix{Float64}:
+ 0.0  0.0  0.0
+ 0.0  0.0  0.0
+ ⋮
+ 0.0  0.0  0.0
+ 0.0  0.0  0.0
+```
+while an anonymous memory map can be created by instead specifying the `Array` type and
+dimensions:
+```julia
+julia> UnixMmap.mmap(Array{Float64}, (128, 3))
+128×3 Matrix{Float64}:
+ 0.0  0.0  0.0
+ 0.0  0.0  0.0
+ ⋮
+ 0.0  0.0  0.0
+ 0.0  0.0  0.0
 ```
 
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
