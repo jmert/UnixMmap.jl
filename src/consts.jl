@@ -9,6 +9,13 @@ import .Sys # explicitly imported to allow docs generation to override
 end
 Base.cconvert(::Type{T}, pf::MmapProtection) where {T <: Integer} = T(pf)
 
+@bitflag SyncFlags::Cuint begin
+    MS_ASYNC      = 0x1
+    MS_INVALIDATE = 0x2
+    MS_SYNC       = 0x4
+end
+Base.cconvert(::Type{T}, sf::SyncFlags) where {T <: Integer} = T(sf)
+
 @staticexpand @bitflag MmapFlags::Cuint begin
     MAP_FILE      = 0x00
     MAP_SHARED    = 0x01
@@ -135,9 +142,21 @@ let _flag_docs
     """ MmapProtection
 
     @doc """
+        @bitflag UnixMmap.SyncFlags
+
+    Set of bit flags which control the memory synchronization behavior.
+
+    The flags available on $(Sys.KERNEL) are:
+    ```julia
+    $(_flag_docs(SyncFlags))
+    ```
+    """ SyncFlags
+
+
+    @doc """
         @bitflag UnixMmap.MmapFlags
 
-    Set of bit flags which control the handling of the memory mappged region. The flag
+    Set of bit flags which control the handling of the memory mapped region. The flag
     should be a bitwise-or combination of flags.
 
     The flags available on $(Sys.KERNEL) are:
