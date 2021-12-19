@@ -281,3 +281,18 @@ function madvise!(array::Array, flag::AdviseFlags = MADV_NORMAL)
     end
     return array
 end
+
+"""
+    msync!(array, flag::SyncFlags = MS_SYNC)
+
+Synchronizes the memory-mapped `array` and its backing file on disk.
+"""
+function msync!(array::Array, flag::SyncFlags = MS_SYNC)
+    GC.@preserve array begin
+        ptr, off, len = pagepointer(array)
+        Base.systemerror("msync",
+                ccall(:msync, Cint, (Ptr{Cvoid}, Csize_t, Cint),
+                      ptr, len, flag) != 0)
+    end
+    return array
+end

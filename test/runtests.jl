@@ -196,3 +196,13 @@ end
     A = mmap(Array{Int}, 500)
     @test A == UnixMmap.madvise!(A, UnixMmap.MADV_WILLNEED)
 end
+
+@testset "Synchronizing" begin
+    # It's hard to test behavior of the sync flags --- just check for not erroring
+    mktemp() do path, io
+        A = mmap(io, Array{Int}, 500)
+        @test A == UnixMmap.msync!(A, UnixMmap.MS_SYNC | UnixMmap.MS_INVALIDATE)
+        A[:] .= 1.0
+        @test A == UnixMmap.msync!(A, UnixMmap.MS_ASYNC)
+    end
+end

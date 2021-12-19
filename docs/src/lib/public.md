@@ -11,6 +11,7 @@ The following functions are available on all Unix systems.
 UnixMmap.mmap
 UnixMmap.mincore
 UnixMmap.madvise!
+UnixMmap.msync!
 ```
 
 OS-specific constants for use with [`mmap`](@ref) and [`madvise!`](@ref) are defined at
@@ -30,6 +31,7 @@ import Main._flag_docs # hide
     <tr><td><code>MmapProtection</code></td>
         <td><code>MmapFlags</code></td>
         <td><code>AdviseFlags</code></td>
+        <td><code>SyncFlags</code></td>
     </tr>
     </thead>
     <tbody>
@@ -52,6 +54,13 @@ _flag_docs(UnixMmap.MmapFlags) # hide
 ```
 ```@example Linux
 _flag_docs(UnixMmap.AdviseFlags) # hide
+```
+```@raw html
+            </td>
+            <td>
+```
+```@example Linux
+_flag_docs(UnixMmap.SyncFlags) # hide
 ```
 ```@raw html
             </td>
@@ -72,6 +81,7 @@ import Main._flag_docs # hide
     <tr><td><code>MmapProtection</code></td>
         <td><code>MmapFlags</code></td>
         <td><code>AdviseFlags</code></td>
+        <td><code>SyncFlags</code></td>
     </tr>
     </thead>
     <tbody>
@@ -94,6 +104,13 @@ _flag_docs(UnixMmap.MmapFlags) # hide
 ```
 ```@example Apple
 _flag_docs(UnixMmap.AdviseFlags) # hide
+```
+```@raw html
+            </td>
+            <td>
+```
+```@example Linux
+_flag_docs(UnixMmap.SyncFlags) # hide
 ```
 ```@raw html
             </td>
@@ -114,6 +131,7 @@ import Main._flag_docs # hide
     <tr><td><code>MmapProtection</code></td>
         <td><code>MmapFlags</code></td>
         <td><code>AdviseFlags</code></td>
+        <td><code>SyncFlags</code></td>
     </tr>
     </thead>
     <tbody>
@@ -136,6 +154,13 @@ _flag_docs(UnixMmap.MmapFlags) # hide
 ```
 ```@example DragonFly
 _flag_docs(UnixMmap.AdviseFlags) # hide
+```
+```@raw html
+            </td>
+            <td>
+```
+```@example Linux
+_flag_docs(UnixMmap.SyncFlags) # hide
 ```
 ```@raw html
             </td>
@@ -156,6 +181,7 @@ import Main._flag_docs # hide
     <tr><td><code>MmapProtection</code></td>
         <td><code>MmapFlags</code></td>
         <td><code>AdviseFlags</code></td>
+        <td><code>SyncFlags</code></td>
     </tr>
     </thead>
     <tbody>
@@ -178,6 +204,13 @@ _flag_docs(UnixMmap.MmapFlags) # hide
 ```
 ```@example FreeBSD
 _flag_docs(UnixMmap.AdviseFlags) # hide
+```
+```@raw html
+            </td>
+            <td>
+```
+```@example Linux
+_flag_docs(UnixMmap.SyncFlags) # hide
 ```
 ```@raw html
             </td>
@@ -198,6 +231,7 @@ import Main._flag_docs # hide
     <tr><td><code>MmapProtection</code></td>
         <td><code>MmapFlags</code></td>
         <td><code>AdviseFlags</code></td>
+        <td><code>SyncFlags</code></td>
     </tr>
     </thead>
     <tbody>
@@ -220,6 +254,13 @@ _flag_docs(UnixMmap.MmapFlags) # hide
 ```
 ```@example NetBSD
 _flag_docs(UnixMmap.AdviseFlags) # hide
+```
+```@raw html
+            </td>
+            <td>
+```
+```@example Linux
+_flag_docs(UnixMmap.SyncFlags) # hide
 ```
 ```@raw html
             </td>
@@ -240,6 +281,7 @@ import Main._flag_docs # hide
     <tr><td><code>MmapProtection</code></td>
         <td><code>MmapFlags</code></td>
         <td><code>AdviseFlags</code></td>
+        <td><code>SyncFlags</code></td>
     </tr>
     </thead>
     <tbody>
@@ -262,6 +304,13 @@ _flag_docs(UnixMmap.MmapFlags) # hide
 ```
 ```@example OpenBSD
 _flag_docs(UnixMmap.AdviseFlags) # hide
+```
+```@raw html
+            </td>
+            <td>
+```
+```@example Linux
+_flag_docs(UnixMmap.SyncFlags) # hide
 ```
 ```@raw html
             </td>
