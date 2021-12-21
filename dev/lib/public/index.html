@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Public · UnixMmap.jl</title><script data-outdated-warner src="../../assets/warner.js"></script><link rel="canonical" href="https://jmert.github.io/UnixMmap.jl/lib/public/"/><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.039/juliamono-regular.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.11/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">UnixMmap.jl</a></span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><span class="tocitem">API Reference</span><ul><li class="is-active"><a class="tocitem" href>Public</a><ul class="internal"><li><a class="tocitem" href="#Functions"><span>Functions</span></a></li><li><a class="tocitem" href="#Constants-—-Linux"><span>Constants — Linux</span></a></li><li><a class="tocitem" href="#Constants-—-Apple"><span>Constants — Apple</span></a></li><li><a class="tocitem" href="#Constants-—-DragonFly-BSD"><span>Constants — DragonFly BSD</span></a></li><li><a class="tocitem" href="#Constants-—-FreeBSD"><span>Constants — FreeBSD</span></a></li><li><a class="tocitem" href="#Constants-—-NetBSD"><span>Constants — NetBSD</span></a></li><li><a class="tocitem" href="#Constants-—-OpenBSD"><span>Constants — OpenBSD</span></a></li></ul></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">API Reference</a></li><li class="is-active"><a href>Public</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Public</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/jmert/UnixMmap.jl/blob/master/docs/src/lib/public.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Public-Documentation"><a class="docs-heading-anchor" href="#Public-Documentation">Public Documentation</a><a id="Public-Documentation-1"></a><a class="docs-heading-anchor-permalink" href="#Public-Documentation" title="Permalink"></a></h1><h2 id="Functions"><a class="docs-heading-anchor" href="#Functions">Functions</a><a id="Functions-1"></a><a class="docs-heading-anchor-permalink" href="#Functions" title="Permalink"></a></h2><p>The following functions are available on all Unix systems.</p><article class="docstring"><header><a class="docstring-binding" id="UnixMmap.mmap" href="#UnixMmap.mmap"><code>UnixMmap.mmap</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">mmap(file::Union{IO,AbstractString}[, ::Type{Array{T}}, dims]; kws...)
-mmap(::Type{Array{T}}, dims; kws...)</code></pre><p>Memory maps an <code>Array</code> from a file <code>file</code> of size <code>dims</code> (either a scalar <code>Integer</code> or a tuple of dimension lengths), or creates an anonymous mapping not backed by a file if no file is given.</p><p>If not specified, the array type defaults to <code>Array{UInt8}</code>, and <code>dim</code> defaults to a vector with length equal to the number of elements remaining in the file (accounting for a non-zero position in the file stream <code>io</code>).</p><p><strong>Extended help</strong></p><p>This function provides a relatively simple wrapper around the underlying <code>mmap</code> system call. In particular, it is the user&#39;s responsibility to ensure the combination(s) of stream state (e.g. read/write or read-only, file length), protection flags, and memory map flags must form a valid <code>mmap</code> request, as they are not validated here.</p><p>See your system <code>mmap</code> man page for details on the behaviors of each flag.</p><p><strong>Keywords</strong></p><p>The following keywords are available:</p><ul><li><p><code>flags::MmapFlags</code> — any of the <code>MAP_*</code> system-specific constants. For files, this defaults to <code>MAP_SHARED</code>, and anonymous mappings default to <code>MAP_SHARED | MAP_ANONYMOUS</code>.</p></li><li><p><code>prot::MmapProtection</code> — any of the <code>PROT_*</code> flags. The default is <code>PROT_READ | PROT_WRITE</code> for all anonymous maps and memory maps of non-existent files (in which case the file will be created). If the file already exists, it is opened read-only and the default is <code>PROT_READ</code> only.</p></li><li><p><code>offset::Integer</code> — offset <em>in bytes</em> from the beginning of the file, defaulting to the current stream position. This keyword is not valid for anonymous maps.</p></li><li><p><code>grow::Bool</code> — Whether to grow a file to accomodate the memory map, if the file is writable. Defaults to <code>true</code>. This keyword is not valid for anonymous maps.</p></li></ul></div><a class="docs-sourcelink" target="_blank" href="https://github.com/jmert/UnixMmap.jl/blob/492457c9efd46ec61d139543fa9dcf586c0f1bba/src/mmap.jl#L195-L233">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="UnixMmap.mincore" href="#UnixMmap.mincore"><code>UnixMmap.mincore</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">mincore(array::Array)</code></pre><p>Returns a boolean array (of length <code>fld1(sizeof(m), PAGESIZE)</code>) indicating whether the pages of the memory-mapped <code>array</code> are resident in RAM. Pages corresponding to <code>false</code> values will cause a fault if referenced.</p><div class="admonition is-info"><header class="admonition-header">Note</header><div class="admonition-body"><p>Memory maps are always page-aligned, so an offset which is not a multiple of <code>PAGESIZE</code> will result in a return array where the first element does <em>not</em> correspond to the first <code>PAGESIZE ÷ sizeof(eltype(array))</code> elements of <code>array</code> — i.e. the first page may cover memory addresses before the first element of <code>array</code>.</p></div></div></div><a class="docs-sourcelink" target="_blank" href="https://github.com/jmert/UnixMmap.jl/blob/492457c9efd46ec61d139543fa9dcf586c0f1bba/src/mmap.jl#L244-L256">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="UnixMmap.madvise!" href="#UnixMmap.madvise!"><code>UnixMmap.madvise!</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">madvise!(array, flag::AdviseFlags = MADV_NORMAL)</code></pre><p>Advises the kernel on the intended usage of the memory-mapped <code>array</code>, with the intent <code>flag</code> being one of the available <code>MADV_*</code> constants.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/jmert/UnixMmap.jl/blob/492457c9efd46ec61d139543fa9dcf586c0f1bba/src/mmap.jl#L269-L274">source</a></section></article><p>OS-specific constants for use with <a href="#UnixMmap.mmap"><code>mmap</code></a> and <a href="#UnixMmap.madvise!"><code>madvise!</code></a> are defined at (pre)compile time. The following systems are supported based on the available OS predicates via Julia&#39;s <code>Base.Sys.KERNEL</code> and <code>Base.Sys.is*</code> functions (some of which are only available for Julia v1.1+).</p><h2 id="Constants-—-Linux"><a class="docs-heading-anchor" href="#Constants-—-Linux">Constants — Linux</a><a id="Constants-—-Linux-1"></a><a class="docs-heading-anchor-permalink" href="#Constants-—-Linux" title="Permalink"></a></h2><table>
+mmap(::Type{Array{T}}, dims; kws...)</code></pre><p>Memory maps an <code>Array</code> from a file <code>file</code> of size <code>dims</code> (either a scalar <code>Integer</code> or a tuple of dimension lengths), or creates an anonymous mapping not backed by a file if no file is given.</p><p>If not specified, the array type defaults to <code>Array{UInt8}</code>, and <code>dim</code> defaults to a vector with length equal to the number of elements remaining in the file (accounting for a non-zero position in the file stream <code>io</code>).</p><p><strong>Extended help</strong></p><p>This function provides a relatively simple wrapper around the underlying <code>mmap</code> system call. In particular, it is the user&#39;s responsibility to ensure the combination(s) of stream state (e.g. read/write or read-only, file length), protection flags, and memory map flags must form a valid <code>mmap</code> request, as they are not validated here.</p><p>See your system <code>mmap</code> man page for details on the behaviors of each flag.</p><p><strong>Keywords</strong></p><p>The following keywords are available:</p><ul><li><p><code>flags::MmapFlags</code> — any of the <code>MAP_*</code> system-specific constants. For files, this defaults to <code>MAP_SHARED</code>, and anonymous mappings default to <code>MAP_SHARED | MAP_ANONYMOUS</code>.</p></li><li><p><code>prot::MmapProtection</code> — any of the <code>PROT_*</code> flags. The default is <code>PROT_READ | PROT_WRITE</code> for all anonymous maps and memory maps of non-existent files (in which case the file will be created). If the file already exists, it is opened read-only and the default is <code>PROT_READ</code> only.</p></li><li><p><code>offset::Integer</code> — offset <em>in bytes</em> from the beginning of the file, defaulting to the current stream position. This keyword is not valid for anonymous maps.</p></li><li><p><code>grow::Bool</code> — Whether to grow a file to accomodate the memory map, if the file is writable. Defaults to <code>true</code>. This keyword is not valid for anonymous maps.</p></li></ul></div><a class="docs-sourcelink" target="_blank" href="https://github.com/jmert/UnixMmap.jl/blob/1bd99b52dfdda7225985aab0bdf5769c150803e2/src/mmap.jl#L195-L233">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="UnixMmap.mincore" href="#UnixMmap.mincore"><code>UnixMmap.mincore</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">mincore(array::Array)</code></pre><p>Returns a boolean array (of length <code>fld1(sizeof(m), PAGESIZE)</code>) indicating whether the pages of the memory-mapped <code>array</code> are resident in RAM. Pages corresponding to <code>false</code> values will cause a fault if referenced.</p><div class="admonition is-info"><header class="admonition-header">Note</header><div class="admonition-body"><p>Memory maps are always page-aligned, so an offset which is not a multiple of <code>PAGESIZE</code> will result in a return array where the first element does <em>not</em> correspond to the first <code>PAGESIZE ÷ sizeof(eltype(array))</code> elements of <code>array</code> — i.e. the first page may cover memory addresses before the first element of <code>array</code>.</p></div></div></div><a class="docs-sourcelink" target="_blank" href="https://github.com/jmert/UnixMmap.jl/blob/1bd99b52dfdda7225985aab0bdf5769c150803e2/src/mmap.jl#L244-L256">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="UnixMmap.madvise!" href="#UnixMmap.madvise!"><code>UnixMmap.madvise!</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">madvise!(array, flag::AdviseFlags = MADV_NORMAL)</code></pre><p>Advises the kernel on the intended usage of the memory-mapped <code>array</code>, with the intent <code>flag</code> being one of the available <code>MADV_*</code> constants.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/jmert/UnixMmap.jl/blob/1bd99b52dfdda7225985aab0bdf5769c150803e2/src/mmap.jl#L269-L274">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="UnixMmap.msync!" href="#UnixMmap.msync!"><code>UnixMmap.msync!</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">msync!(array, flag::SyncFlags = MS_SYNC)</code></pre><p>Synchronizes the memory-mapped <code>array</code> and its backing file on disk.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/jmert/UnixMmap.jl/blob/1bd99b52dfdda7225985aab0bdf5769c150803e2/src/mmap.jl#L285-L289">source</a></section></article><p>OS-specific constants for use with <a href="#UnixMmap.mmap"><code>mmap</code></a> and <a href="#UnixMmap.madvise!"><code>madvise!</code></a> are defined at (pre)compile time. The following systems are supported based on the available OS predicates via Julia&#39;s <code>Base.Sys.KERNEL</code> and <code>Base.Sys.is*</code> functions (some of which are only available for Julia v1.1+).</p><h2 id="Constants-—-Linux"><a class="docs-heading-anchor" href="#Constants-—-Linux">Constants — Linux</a><a id="Constants-—-Linux-1"></a><a class="docs-heading-anchor-permalink" href="#Constants-—-Linux" title="Permalink"></a></h2><table>
     <thead>
     <tr><td><code>MmapProtection</code></td>
         <td><code>MmapFlags</code></td>
         <td><code>AdviseFlags</code></td>
+        <td><code>SyncFlags</code></td>
     </tr>
     </thead>
     <tbody>
@@ -54,6 +55,10 @@ MADV_PAGEOUT
 MADV_HWPOISON
 MADV_SOFT_OFFLINE</code></pre>
 </div>            </td>
+            <td><div class="markdown"><pre><code class="language-julia">MS_ASYNC
+MS_INVALIDATE
+MS_SYNC</code></pre>
+</div>            </td>
         </tr>
     </tbody>
 </table><h2 id="Constants-—-Apple"><a class="docs-heading-anchor" href="#Constants-—-Apple">Constants — Apple</a><a id="Constants-—-Apple-1"></a><a class="docs-heading-anchor-permalink" href="#Constants-—-Apple" title="Permalink"></a></h2><table>
@@ -61,6 +66,7 @@ MADV_SOFT_OFFLINE</code></pre>
     <tr><td><code>MmapProtection</code></td>
         <td><code>MmapFlags</code></td>
         <td><code>AdviseFlags</code></td>
+        <td><code>SyncFlags</code></td>
     </tr>
     </thead>
     <tbody>
@@ -88,6 +94,10 @@ MADV_WILLNEED
 MADV_DONTNEED
 MADV_FREE</code></pre>
 </div>            </td>
+            <td><div class="markdown"><pre><code class="language-julia">MS_ASYNC
+MS_INVALIDATE
+MS_SYNC</code></pre>
+</div>            </td>
         </tr>
     </tbody>
 </table><h2 id="Constants-—-DragonFly-BSD"><a class="docs-heading-anchor" href="#Constants-—-DragonFly-BSD">Constants — DragonFly BSD</a><a id="Constants-—-DragonFly-BSD-1"></a><a class="docs-heading-anchor-permalink" href="#Constants-—-DragonFly-BSD" title="Permalink"></a></h2><table>
@@ -95,6 +105,7 @@ MADV_FREE</code></pre>
     <tr><td><code>MmapProtection</code></td>
         <td><code>MmapFlags</code></td>
         <td><code>AdviseFlags</code></td>
+        <td><code>SyncFlags</code></td>
     </tr>
     </thead>
     <tbody>
@@ -134,6 +145,10 @@ MADV_CORE
 MADV_INVAL
 MADV_SETMAP</code></pre>
 </div>            </td>
+            <td><div class="markdown"><pre><code class="language-julia">MS_ASYNC
+MS_INVALIDATE
+MS_SYNC</code></pre>
+</div>            </td>
         </tr>
     </tbody>
 </table><h2 id="Constants-—-FreeBSD"><a class="docs-heading-anchor" href="#Constants-—-FreeBSD">Constants — FreeBSD</a><a id="Constants-—-FreeBSD-1"></a><a class="docs-heading-anchor-permalink" href="#Constants-—-FreeBSD" title="Permalink"></a></h2><table>
@@ -141,6 +156,7 @@ MADV_SETMAP</code></pre>
     <tr><td><code>MmapProtection</code></td>
         <td><code>MmapFlags</code></td>
         <td><code>AdviseFlags</code></td>
+        <td><code>SyncFlags</code></td>
     </tr>
     </thead>
     <tbody>
@@ -174,6 +190,10 @@ MADV_NOCORE
 MADV_CORE
 MADV_PROTECT</code></pre>
 </div>            </td>
+            <td><div class="markdown"><pre><code class="language-julia">MS_ASYNC
+MS_INVALIDATE
+MS_SYNC</code></pre>
+</div>            </td>
         </tr>
     </tbody>
 </table><h2 id="Constants-—-NetBSD"><a class="docs-heading-anchor" href="#Constants-—-NetBSD">Constants — NetBSD</a><a id="Constants-—-NetBSD-1"></a><a class="docs-heading-anchor-permalink" href="#Constants-—-NetBSD" title="Permalink"></a></h2><table>
@@ -181,6 +201,7 @@ MADV_PROTECT</code></pre>
     <tr><td><code>MmapProtection</code></td>
         <td><code>MmapFlags</code></td>
         <td><code>AdviseFlags</code></td>
+        <td><code>SyncFlags</code></td>
     </tr>
     </thead>
     <tbody>
@@ -213,6 +234,10 @@ MADV_DONTNEED
 MADV_SPACEAVAIL
 MADV_FREE</code></pre>
 </div>            </td>
+            <td><div class="markdown"><pre><code class="language-julia">MS_ASYNC
+MS_INVALIDATE
+MS_SYNC</code></pre>
+</div>            </td>
         </tr>
     </tbody>
 </table><h2 id="Constants-—-OpenBSD"><a class="docs-heading-anchor" href="#Constants-—-OpenBSD">Constants — OpenBSD</a><a id="Constants-—-OpenBSD-1"></a><a class="docs-heading-anchor-permalink" href="#Constants-—-OpenBSD" title="Permalink"></a></h2><table>
@@ -220,6 +245,7 @@ MADV_FREE</code></pre>
     <tr><td><code>MmapProtection</code></td>
         <td><code>MmapFlags</code></td>
         <td><code>AdviseFlags</code></td>
+        <td><code>SyncFlags</code></td>
     </tr>
     </thead>
     <tbody>
@@ -245,6 +271,10 @@ MADV_DONTNEED
 MADV_SPACEAVAIL
 MADV_FREE</code></pre>
 </div>            </td>
+            <td><div class="markdown"><pre><code class="language-julia">MS_ASYNC
+MS_INVALIDATE
+MS_SYNC</code></pre>
+</div>            </td>
         </tr>
     </tbody>
-</table></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../">« Home</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.10 on <span class="colophon-date" title="Saturday 18 December 2021 17:13">Saturday 18 December 2021</span>. Using Julia version 1.7.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+</table></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../">« Home</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.10 on <span class="colophon-date" title="Tuesday 21 December 2021 02:01">Tuesday 21 December 2021</span>. Using Julia version 1.7.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
