@@ -9,7 +9,7 @@ MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
 Mmap = "a63ad114-7e13-5084-954f-fe012c677804"
 
 [compat]
-BitFlags = "0.1"
+BitFlags = "0.1.7"
 MacroTools = "0.5"
 julia = "1"
 
