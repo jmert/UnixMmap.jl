@@ -47,6 +47,8 @@ function _sys_mmap(ptr::Ptr{Cvoid}, len::Int,
             ArgumentError("requested size must be < $(typemax(Int)-PAGESIZE), got $len"))
     offset >= 0 || throw(ArgumentError("requested offset must be ≥ 0, got $offset"))
 
+    # N.B. mmap may be a C header macro to another name, so use Julia's wrapper (just as
+    #      Mmap.mmap does)
     ret = ccall(:jl_mmap, Ptr{Cvoid}, (Ptr{Cvoid}, Csize_t, Cint, Cint, RawFD, Int64),
                 ptr, len, prot, flags, fd, offset)
     Base.systemerror("mmap", reinterpret(Int, ret) == -1)
