@@ -7,14 +7,12 @@ import .Sys # explicitly imported to allow docs generation to override
     PROT_WRITE = 0x02
     PROT_EXEC  = 0x04
 end
-Base.cconvert(::Type{T}, pf::MmapProtection) where {T <: Integer} = T(pf)
 
 @bitflag SyncFlags::Cuint begin
     MS_ASYNC      = 0x1
     MS_INVALIDATE = 0x2
     MS_SYNC       = 0x4
 end
-Base.cconvert(::Type{T}, sf::SyncFlags) where {T <: Integer} = T(sf)
 
 @staticexpand @bitflag MmapFlags::Cuint begin
     MAP_FILE      = 0x00
@@ -67,7 +65,6 @@ Base.cconvert(::Type{T}, sf::SyncFlags) where {T <: Integer} = T(sf)
         MAP_STACK    = 0x2000
     end
 end
-Base.cconvert(::Type{T}, mf::MmapFlags) where {T <: Integer} = T(mf)
 
 # Provide this weird mode?
 #@static if Sys.islinux()
@@ -116,7 +113,6 @@ Base.cconvert(::Type{T}, mf::MmapFlags) where {T <: Integer} = T(mf)
         MADV_FREE = 6
     end
 end
-Base.cconvert(::Type{T}, af::AdviseFlags) where {T <: Integer} = T(af)
 
 # documentation requires the types to be defined first, so do after the fact
 let _flag_docs
