@@ -1,4 +1,4 @@
-ame: TagBot
+name: TagBot
 on:
   issue_comment:
     types:
