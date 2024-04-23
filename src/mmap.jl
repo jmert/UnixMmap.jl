@@ -80,7 +80,8 @@ function _mmap(::Type{Array{T}}, dims::NTuple{N,Integer},
     ptr = _sys_mmap(C_NULL, mmaplen, prot, flags, fd, Int64(offset) - page_pad)
     aptr = convert(Ptr{T}, ptr + page_pad)
     array = unsafe_wrap(Array{T,N}, aptr, dims)
-    finalizer(_ -> _sys_unmap!(ptr, mmaplen), array)
+    finalizer(_ -> _sys_unmap!(ptr, mmaplen),
+              @static VERSION >= v"1.11.0-DEV" && hasfield(Array, :ref) ? array.ref.mem : array)
     return array
 end
 function _mmap(::Type{Array{T}}, len::Int, prot::MmapProtection, flags::MmapFlags,
