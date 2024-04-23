@@ -248,3 +248,33 @@ end
         @test A == UnixMmap.msync!(A, UnixMmap.MS_ASYNC)
     end
 end
+
+@testset "Julia Memory-backed arrays" begin
+    # See JuliaLang/julia#54128 and JuliaLang/julia#54210
+    mktempdir() do tdir
+        cd(tdir) do
+            # generate and store some random data in a file
+            open("rand.dat", "w") do io
+                write(io, rand(UInt8, 1024))
+            end
+
+            # read the contents of the file twice
+            # 1st: read as a plain array
+            plain = open("rand.dat", "r") do io
+                read(io)
+            end
+            # 2nd: read via a memory mapped array, wrapped in an IOBuffer.
+            #      The IOBuffer is important in order to lose the original Array wrapper of
+            #      the underlying Memory on Julia 1.11+
+            mapbuf = open("rand.dat", "r") do io
+                IOBuffer(mmap(io, Vector{UInt8}))
+            end
+
+            # Force a garbage collection
+            GC.gc(true)
+            # Then check that the plain array matches what can be retrieved from the IOBuffer
+            # If the underlying memory map has been freed, this should result in a segfault.
+            @test plain == take!(mapbuf)
+        end
+    end
+end
