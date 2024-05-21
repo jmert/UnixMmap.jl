@@ -1,7 +1,7 @@
 name = "UnixMmap"
 uuid = "674b2976-56af-439b-a2b1-837be4a3d087"
 authors = ["Justin Willmert <justin@willmert.me> and contributors"]
-version = "1.0.1"
+version = "1.0.2"
 
 [deps]
 BitFlags = "d1d4a3ce-64b1-5f1a-9ba4-7e7e69966f35"
