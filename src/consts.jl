@@ -1,11 +1,15 @@
 using BitFlags
 import .Sys # explicitly imported to allow docs generation to override
 
-@bitflag MmapProtection::Cuint begin
+@staticexpand @bitflag MmapProtection::Cuint begin
     PROT_NONE  = 0x00
     PROT_READ  = 0x01
     PROT_WRITE = 0x02
     PROT_EXEC  = 0x04
+    @static if Sys.islinux()
+        PROT_GROWSDOWN = 0x01000000
+        PROT_GROWSUP   = 0x02000000
+    end
 end
 
 @bitflag SyncFlags::Cuint begin
@@ -21,6 +25,7 @@ end
     MAP_FIXED     = 0x0010
     MAP_ANONYMOUS = @static Sys.isbsd() ? 0x1000 : 0x0020
     @static if Sys.islinux()
+        MAP_DROPPABLE  =   0x0008
         MAP_32BIT      =   0x0040
         MAP_GROWSDOWN  =   0x0100
         MAP_DENYWRITE  =   0x0800
@@ -92,8 +97,14 @@ end
         MADV_KEEPONFORK = 19
         MADV_COLD = 20
         MADV_PAGEOUT = 21
+        MADV_POPULATE_READ = 22
+        MADV_POPULATE_WRITE = 23
+        MADV_DONTNEED_LOCKED = 24
+        MADV_COLLAPSE = 25
         MADV_HWPOISON = 100
         MADV_SOFT_OFFLINE = 101
+        MADV_GUARD_INSTALL = 102
+        MADV_GUARD_REMOVE = 103
     elseif Sys.isapple()
         MADV_FREE = 5
     elseif VERSION >= v"1.1" && (Sys.isfreebsd() || Sys.isdragonfly())
