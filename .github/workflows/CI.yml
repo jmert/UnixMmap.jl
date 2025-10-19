@@ -1,16 +1,13 @@
 name: CI
 on:
   push:
-    branches:
-      - 'master'
-    tags: '*'
+    branches: ['master']
+    tags: ['*']
     paths-ignore:
       - 'README.md'
-      - '.github/workflows/**'
   pull_request:
     paths-ignore:
       - 'README.md'
-      - '.github/workflows/**'
   workflow_dispatch:
 
 concurrency:
@@ -22,13 +19,13 @@ concurrency:
 jobs:
   test:
     if: "!contains(github.event.head_commit.message, 'skip ci')"
-    name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }}
+    name: Tests
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         version:
-          - '1.0'     # earliest supported
+          - 'min'     # earliest supported
           - '1'       # latest release
           - 'nightly'
         os:
@@ -41,7 +38,7 @@ jobs:
           - os: macOS-latest
             arch: x86
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.version }}
@@ -49,11 +46,12 @@ jobs:
       - uses: julia-actions/cache@v2
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
+
   docs:
     name: Documentation
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: julia-actions/setup-julia@v2
         with:
           version: '1'
