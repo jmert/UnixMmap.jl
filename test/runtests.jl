@@ -278,3 +278,9 @@ end
         end
     end
 end
+
+@testset "Other tests" begin
+    if isdefined(Test, :detect_closure_boxes)
+        @test length(Test.detect_closure_boxes(UnixMmap)) == 0
+    end
+end
