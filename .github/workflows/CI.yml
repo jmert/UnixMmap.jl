@@ -31,12 +31,16 @@ jobs:
         os:
           - ubuntu-latest
           - macOS-latest
-        arch:
-          - x64
-          - x86
+        include:
+          - os: ubuntu-latest
+            arch: x86
+          - os: ubuntu-latest
+            arch: x64
+          - os: macOS-latest
+            arch: arm64
         exclude:
           - os: macOS-latest
-            arch: x86
+            version: min
     steps:
       - uses: actions/checkout@v6
       - uses: julia-actions/setup-julia@v3
