@@ -315,6 +315,32 @@ end
 end
 
 @testset "Other tests" begin
+    @testset "primitive types with non-power-of-two sizes" begin
+        # Use >12 bytes so that padding goes to 16 bytes on both 32bit and 64bit arch
+        primitive type IrregularBitsType 13 * 8 end
+        @test sizeof(IrregularBitsType) == 13
+        @test Base.aligned_sizeof(IrregularBitsType) == 16
+
+        data = IrregularBitsType[
+            Core.Intrinsics.zext_int(IrregularBitsType, 0xcafef00d),
+            Core.Intrinsics.zext_int(IrregularBitsType, 0xfeedface),
+        ]
+        # Prior to Julia v1.5, write(fh, data) incorrectly ignores the padding in the array;
+        # construct the equivalent padded array directly and write that instead.
+        padded = UInt128[0xcafef00d, 0xfeedface]
+
+        mktemp() do path, fh
+            wb = write(fh, padded)
+            flush(fh)
+            seek(fh, 0)
+            @test UnixMmap.filedim(fh, IrregularBitsType, 0) == (2,)
+
+            A = mmap(path, Vector{IrregularBitsType}; prot = UnixMmap.PROT_READ)
+            @test length(A) == 2
+            @test A == data
+        end
+    end
+
     if isdefined(Test, :detect_closure_boxes)
         @test length(Test.detect_closure_boxes(UnixMmap)) == 0
     end

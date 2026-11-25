@@ -11,11 +11,11 @@ fileposition(io::IO) = Int64(position(io))
 
 function filedim(io::IO, T::Type, offset::Union{Integer,Nothing} = nothing)
     offset = offset === nothing ? position(io) : offset
-    return (div(filesize(io) - offset, sizeof(T)),)
+    return (div(filesize(io) - offset, Base.aligned_sizeof(T)),)
 end
 function filedim(file::AbstractString, T::Type, offset::Union{Integer,Nothing} = nothing)
     offset = offset === nothing ? 0 : offset
-    return (div(filesize(file) - offset, sizeof(T)),)
+    return (div(filesize(file) - offset, Base.aligned_sizeof(T)),)
 end
 
 function filemode(fd::RawFD)
@@ -69,7 +69,7 @@ function _mmap(::Type{Array{T}}, dims::NTuple{N,Integer},
               fd::RawFD, offset::Integer) where {T, N}
     isbitstype(T) || throw(ArgumentError("unable to mmap type $T; must satisfy `isbitstype(T) == true`"))
 
-    len = prod(dims) * sizeof(T)
+    len = prod(dims) * Base.aligned_sizeof(T)
     iszero(len) && return Array{T}(undef, ntuple(x->0, Val(N)))
     len > 0 || throw(ArgumentError("requested size must be ≥ 0, got $len"))
     len = Int(len)
@@ -99,7 +99,7 @@ function mmap(io::IO, ::Type{<:Array{T}}, dims::NTuple{N,Integer};
     isbitstype(T) || throw(ArgumentError("unable to mmap type $T; must satisfy `isbitstype(T) == true`"))
     isopen(io) || throw(ArgumentError("$io must be open to mmap"))
 
-    len = prod(dims) * sizeof(T)
+    len = prod(dims) * Base.aligned_sizeof(T)
     iszero(len) && return Array{T}(undef, ntuple(x->0, Val(N)))
     len > 0 || throw(ArgumentError("requested size must be ≥ 0, got $len"))
     len = Int(len)
