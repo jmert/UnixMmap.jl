@@ -2,6 +2,33 @@ using UnixMmap
 using UnixMmap: mmap, PROT_READ, PROT_WRITE, MAP_PRIVATE, MAP_SHARED
 using Test
 
+
+# Julia normally translates SIGSEGV from trying to write to read-only memory into a
+# ReadOnlyMemoryError. Due to a change in glibc, though, the "handle signal and resume"
+# process does not work on all versions of Julia for certain glibc versions.
+# (See issue JuliaLang/julia#62683 and fix JuliaLang/julia#62684.)
+# Skip tests if we can reasonably expect the SIGSEGV is not handled as desired.
+function readonly_will_segfault()
+    # x86-64 Linux only
+    !Sys.islinux() && return false
+    Sys.ARCH !== :x86_64 && return false
+    # Julia versions prior to v1.11 are unaffected
+    VERSION <= v"1.11" && return false
+    # Fix is backported to v1.12.8 and exists in all (released) versions of v1.13
+    VERSION >= v"1.12.8" && return false
+
+    # Now try to get the glibc version
+    try
+        gnu_ver = unsafe_string(ccall(:gnu_get_libc_version, Cstring, ()))
+        ver = match(r"^(\d+\.\d+)", gnu_ver)
+        return ver !== nothing && VersionNumber(ver.captures[1]) >= v"2.44"
+    catch
+        # must not be a glibc version, so unaffected
+        return false
+    end
+end
+
+
 @testset "Mapping files by name" begin
     data = [zeros(Float64, 100); ones(Float64, 256)]
     byteoff = 100 * sizeof(Float64)
@@ -20,7 +47,11 @@ using Test
         @test all(isone, A)
 
         # File exists → opened by default as read-only
-        @test_throws ReadOnlyMemoryError A[1] = 0.0
+        if readonly_will_segfault()
+            @test_skip @test_throws ReadOnlyMemoryError A[1] = 0.0
+        else
+            @test_throws ReadOnlyMemoryError A[1] = 0.0
+        end
 
         # Re-open with read-write permissions
         A = mmap(path, Array{Float64}, 256; offset = byteoff, prot = PROT_READ | PROT_WRITE)
@@ -65,7 +96,11 @@ end
         @test all(isone, A)
 
         # File exists → opened by default as read-only
-        @test_throws ReadOnlyMemoryError A[1] = 0.0
+        if readonly_will_segfault()
+            @test_skip @test_throws ReadOnlyMemoryError A[1] = 0.0
+        else
+            @test_throws ReadOnlyMemoryError A[1] = 0.0
+        end
 
         # File handle opened read-only, but requesting read-write
         @test_throws SystemError mmap(io, Array{Float64}, 256; prot = PROT_READ | PROT_WRITE)
