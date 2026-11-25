@@ -26,14 +26,12 @@ jobs:
       matrix:
         version:
           - 'min'     # earliest supported
-          - '1'       # latest release
-          - 'nightly'
+          - '1.13'    # latest supported release
         os:
           - ubuntu-latest
         arch: [ 'x86', 'x64' ]
         include:
-          - { os: macOS-latest, arch: arm64, version: '1' }
-          - { os: macOS-latest, arch: arm64, version: 'nightly' }
+          - { os: macOS-latest, arch: arm64, version: '1.13' }
     steps:
       - uses: actions/checkout@v7
       - uses: julia-actions/setup-julia@v3
