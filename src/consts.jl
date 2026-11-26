@@ -16,6 +16,8 @@ end
     MS_ASYNC = 0x1
     @static if Sys.isapple()
         MS_INVALIDATE = 0x02
+        MS_KILLPAGES  = 0x04
+        MS_DEACTIVATE = 0x08
         MS_SYNC       = 0x10
     elseif VERSION >= v"1.1" && (Sys.isfreebsd() || Sys.isdragonfly())
         MS_SYNC       = 0x0
@@ -57,13 +59,24 @@ end
         MAP_NOEXTEND     = 0x0100
         MAP_HASSEMAPHORE = 0x0200
     end
-    @static if VERSION >= v"1.1" && Sys.isfreebsd()
-        MAP_STACK   =   0x0400
-        MAP_NOSYNC  =   0x0800
-        MAP_GUARD   =   0x2000
-        MAP_EXCL    =   0x4000
-        MAP_NOCORE  = 0x2_0000
-        MAP_32BIT   = 0x8_0000
+    @static if Sys.isapple()
+        MAP_NOCACHE            =   0x0400
+        MAP_JIT                =   0x0800
+        MAP_RESILIENT_CODESIGN =   0x2000
+        MAP_RESILIENT_MEDIA    =   0x4000
+        MAP_32BIT              =   0x8000
+        MAP_TRANSLATED_ALLOW_EXECUTE = 0x2_0000
+        MAP_UNIX03             = 0x4_0000
+        MAP_TPRO               = 0x8_0000
+    elseif VERSION >= v"1.1" && Sys.isfreebsd()
+        MAP_HASSEMAPHORE  =   0x0200
+        MAP_STACK         =   0x0400
+        MAP_NOSYNC        =   0x0800
+        MAP_GUARD         =   0x2000
+        MAP_EXCL          =   0x4000
+        MAP_NOCORE        = 0x2_0000
+        MAP_PREFAULT_READ = 0x4_0000
+        MAP_32BIT         = 0x8_0000
     elseif VERSION >= v"1.1" && Sys.isdragonfly()
         MAP_STACK      =   0x0400
         MAP_NOSYNC     =   0x0800
@@ -71,6 +84,7 @@ end
         MAP_TRYFIXED   = 0x1_0000
         MAP_NOCORE     = 0x2_0000
         MAP_SIZEALIGN  = 0x4_0000
+        MAP_32BIT      = 0x8_0000
     elseif VERSION >= v"1.1" && Sys.isopenbsd()
         MAP_STACK   = 0x4000
         MAP_CONCEAL = 0x8000
@@ -118,6 +132,11 @@ end
         MADV_GUARD_REMOVE = 103
     elseif Sys.isapple()
         MADV_FREE = 5
+        MADV_ZERO_WIRED_PAGES = 6
+        MADV_FREE_REUSABLE = 7
+        MADV_FREE_REUSE = 8
+        MADV_CAN_REUSE = 9
+        MADV_ZERO = 11
     elseif VERSION >= v"1.1" && (Sys.isfreebsd() || Sys.isdragonfly())
         MADV_FREE = 5
         MADV_NOSYNC = 6
