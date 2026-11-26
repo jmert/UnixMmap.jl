@@ -12,10 +12,21 @@ import .Sys # explicitly imported to allow docs generation to override
     end
 end
 
-@bitflag SyncFlags::Cuint begin
-    MS_ASYNC      = 0x1
-    MS_INVALIDATE = 0x2
-    MS_SYNC       = 0x4
+@staticexpand @bitflag SyncFlags::Cuint begin
+    MS_ASYNC = 0x1
+    @static if Sys.isapple()
+        MS_INVALIDATE = 0x02
+        MS_SYNC       = 0x10
+    elseif VERSION >= v"1.1" && (Sys.isfreebsd() || Sys.isdragonfly())
+        MS_SYNC       = 0x0
+        MS_INVALIDATE = 0x2
+    elseif VERSION >= v"1.1" && Sys.isopenbsd()
+        MS_SYNC       = 0x2
+        MS_INVALIDATE = 0x4
+    else
+        MS_INVALIDATE = 0x2
+        MS_SYNC       = 0x4
+    end
 end
 
 @staticexpand @bitflag MmapFlags::Cuint begin
@@ -51,7 +62,7 @@ end
         MAP_NOSYNC  =   0x0800
         MAP_GUARD   =   0x2000
         MAP_EXCL    =   0x4000
-        MAP_NOCORE  = 0x4_0000
+        MAP_NOCORE  = 0x2_0000
         MAP_32BIT   = 0x8_0000
     elseif VERSION >= v"1.1" && Sys.isdragonfly()
         MAP_STACK      =   0x0400
